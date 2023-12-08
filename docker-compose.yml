@@ -1,0 +1,95 @@
+version: '2.1'
+
+services:
+  mai-db-node-ex01:
+    build:
+      context: mariadb
+      dockerfile: Dockerfile
+    container_name: mai-db-node-ex01
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: archdb
+      MYSQL_USER: stud
+      MYSQL_PASSWORD: stud
+      MYSQL_ROOT_PASSWORD: '1'
+    command: >
+      --sql-mode='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION'
+      --general-log=ON
+      --log-queries-not-using-indexes=ON
+    networks:
+      - arch-network
+    ports:
+      - 3306:3306
+    healthcheck:
+      test: "/usr/bin/mariadb --user=stud --password=stud --execute \"SHOW DATABASES;\""
+      interval: 15s
+      timeout: 1s
+      retries: 5
+    volumes:
+      - db-node-ex01-data:/var/lib/mysql
+      - ./database_init/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  user_service:
+    build:
+      context: ./services/user
+      dockerfile: Dockerfile
+    container_name: user_service
+    environment:
+      - DB_HOST=mai-db-node-ex01
+      - DB_PORT=3306
+      - DB_LOGIN=stud
+      - DB_PASSWORD=stud
+      - DB_DATABASE=archdb
+    ports:
+      - 8080:8080
+    networks:
+      - arch-network
+    depends_on:
+      mai-db-node-ex01:
+        condition: service_healthy
+
+  lecture_service:
+    build:
+      context: ./services/lecture
+      dockerfile: Dockerfile
+    container_name: lecture_service
+    environment:
+      - DB_HOST=mai-db-node-ex01
+      - DB_PORT=3306
+      - DB_LOGIN=stud
+      - DB_PASSWORD=stud
+      - DB_DATABASE=archdb
+    ports:
+      - 8080:8080
+    networks:
+      - arch-network
+    depends_on:
+      mai-db-node-ex01:
+        condition: service_healthy
+
+  conference_service:
+    build:
+      context: ./services/conference
+      dockerfile: Dockerfile
+    container_name: conference_service
+    environment:
+      - DB_HOST=mai-db-node-ex01
+      - DB_PORT=3306
+      - DB_LOGIN=stud
+      - DB_PASSWORD=stud
+      - DB_DATABASE=archdb
+    ports:
+      - 8080:8080
+    networks:
+      - arch-network
+    depends_on:
+      mai-db-node-ex01:
+        condition: service_healthy
+
+volumes:
+  db-node-ex01-data:
+
+networks:
+  arch-network:
+    driver: "bridge"
+    external: false

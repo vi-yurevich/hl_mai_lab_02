@@ -1,0 +1,467 @@
+openapi: '3.0.0'
+info:
+  version: '1.0.0'
+  title: 'Lab 2'
+  description: API сервера для сайта конференций
+paths:
+  /user:
+    get:
+      servers:
+        - url: http://localhost:8080
+      summary: Чтение информации о пользователе
+      parameters:
+      - name: id
+        description: Уникальный идентификатор пользователя
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/user_id'
+      responses:
+        '200':
+          description: Найденный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        404:
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      servers:
+        - url: http://localhost:8080
+      summary: Добавление нового пользователя
+      parameters:
+      - name: first_name
+        description: Имя пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: last_name
+        description: Фамилия пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: email
+        description: email пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: title
+        description: Форма обращение к пользователя 
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: login
+        description: login пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: password
+        description: пароль пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Идентификатор, добавленного пользователя
+          content:
+            application/json:
+              schema:
+                type: integer
+        404:
+          description: Ошибка добавления пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /user/search/login:
+    get:
+      servers:
+        - url: http://localhost:8080
+      summary: Поиск пользователя по логину
+      parameters:
+      - name: login
+        description: Логин
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Пользователь с соответствующим логином
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        404:
+          description: Пользователь с таким логином не существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        500:
+          description: Непредвиденная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'        
+  /user/search:
+    get:
+      servers:
+        - url: http://localhost:8081
+      summary: Поиск пользователей по маске имени и фамилии
+      parameters:
+      - name: first_name
+        description: Имя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: last_name
+        description: Фамилия
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: The users for the provided masks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/users'
+        404:
+          description: No user found for the provided mask
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        500:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /lecture:
+    get:
+      servers:
+        - url: http://localhost:8081
+      summary: Чтение информации о докладе
+      parameters:
+      - name: id
+        description: Уникальный идентификатор доклада
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/lecture_id'
+      responses:
+        200:
+          description: Найденный доклад
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/lecture'
+        404:
+          description: Доклад не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      summary: Добавление нового доклада
+      parameters:
+      - name: title
+        description: Название доклада
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: description
+        description: Аннотация к докладу
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: record_permission
+        description: Разрешение на запись
+        in: query
+        required: false
+        schema:
+          type: string
+          default: false
+      - name: author_id
+        description: Идентификатор автора доклада 
+        in: query
+        required: true
+        schema:
+            $ref: '#/components/schemas/user_id'
+      - name: conference_id
+        description: Идентификатор конференции
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/conference_id'
+      responses:
+        '200':
+          description: Идентификатор, добавленного доклада
+          content:
+            application/json:
+              schema:
+                type: integer
+        404:
+          description: Ошибка добавления доклада
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /lectures:
+    get:
+      servers:
+        - url: http://localhost:8081
+      summary: Получения списка всех докладов
+      responses:
+        200:
+          description: Список всех докладов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/lectures'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /lectures/by_author:
+    parameters:
+    - name: author_id
+      description: Уникальный идентификатор автора
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/user_id'
+    get:
+      servers:
+        - url: http://localhost:8081
+      summary: Получение списка всех докладов пользователя
+      responses:
+        200:
+          description: Список докладов, относящийся к конкретному пользователю
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/lectures'
+        404:
+          description: Указанный пользователь не существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /conference/lectures:
+    parameters:
+    - name: conference_id
+      description: Уникальный идентификатор конференции
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/conference_id'  
+    get:
+      servers:
+        - url: http://localhost:8082
+      summary: Получение списка всех докладов, читаемых в рамках указанной конференции
+      responses:
+        200:
+          description: Список докладов, читаемых в рамках указанной конференции
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/lectures'
+        404:
+          description: Указанная конференция не существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /conference/authors:
+    parameters:
+    - name: conference_id
+      description: Уникальный идентификатор конференции
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/conference_id'  
+    get:
+      servers:
+        - url: http://localhost:8082
+      summary: Получение списка всех авторов, которые читают доклады в рамках указанной конференции
+      responses:
+        200:
+          description: Список авторов, участвующих в данной конференции
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/users'
+        404:
+          description: Указанная конференция не существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+components:
+  schemas:
+    user_id:
+      description: Уникальный идентификатор пользователя
+      type: integer
+    lecture_id:
+      description: Уникальный идентификатор доклада
+      type: integer
+    conference_id:
+      description: Уникальный идентификатор конференции
+      type: integer
+    users:
+      type: array
+      items:
+        $ref: '#/components/schemas/user'
+    lectures:
+      type: array
+      items:
+        $ref: '#/components/schemas/lecture'
+    user:
+      type: object
+      required:
+        - id
+        - first_name
+        - last_name
+        - email
+        - phone_number
+        - login
+        - password
+      properties:
+        id:
+          $ref: '#/components/schemas/user_id'
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        title:
+          type: string
+        login:
+          type: string
+        password:
+          type: string
+    lecture:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - record_permission
+        - author_id
+        - conference_id
+      properties:
+        id:
+          $ref: '#/components/schemas/lecture_id'
+        title:
+          type: string
+          description: название доклада
+        description:
+          type: string
+          description: аннотация доклада
+        record_permission:
+          type: boolean
+          description: наличие разрешения на запись доклада
+        author_id:
+          $ref: '#/components/schemas/user_id'
+          description: идентификатор автора доклада
+        conference_id:
+          $ref: '#/components/schemas/conference_id'
+          description: идентификатор конференции, в рамках которой будет проходить доклад
+    conference:
+      type: object
+      required:
+        - id
+        - location
+        - title
+        - description
+        - format
+      properties:
+        id:
+          $ref: '#/components/schemas/conference_id'
+        location:
+          type: string
+          description: Место проведения конференции
+        title:
+          type: string
+          description: Название конференции
+        description:
+          type: string
+          description: описание конференции
+        format:
+          type: string
+    error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          description: Сообщение о ошибке
+          type: string
+  securitySchemes:
+      basicAuth:     
+        type: http
+        scheme: basic
+security:
+  - basicAuth: []
